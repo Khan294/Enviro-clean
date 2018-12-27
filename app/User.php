@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'type'
+        'name', 'email', 'password', 'type', 'image', 'wage', 'contact'
     ];
 
     /**
@@ -23,11 +23,17 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
+    protected $hidden = [ 'remember_token', 'password'];
 
-    public function inReceipts(){
-        return $this->hasMany('\App\InReceipt', 'ordertaker_id'); 
+    public function regions(){
+        return $this->hasMany('\App\Region');
+    }
+
+    public function violations(){
+        return $this->hasMany('\App\Violation');
+    }
+
+    public function chats() {
+        return $this->belongsToMany('\App\Chat');
     }
 }

@@ -46,8 +46,23 @@ class Handler extends ExceptionHandler {
      * @return \Illuminate\Http\Response
      */
     public function render($request, Exception $exception) {
-        if($request->wantsJson())
-            return response()->json(["status"=> "exception", "error" => $exception->getMessage()]);         
+        if ($exception instanceof \Illuminate\Session\TokenMismatchException) {
+            if($request->wantsJson())
+                return response()->json(['error' => 'Token not valid.']);
+
+            return redirect()
+                    ->back()
+                    ->withInput($request->except('password'))
+                    ->with([
+                        'message' => 'Validation Token was expired. Please try again',
+                        'message-type' => 'danger']);
+        } else if ($exception instanceof \Illuminate\Database\QueryException) {
+            $errorCode = $exception->errorInfo[1];
+            if($errorCode == '1062')
+              return response()->json(['error' => 'Already taken!']);
+        }
+
+        //if($request->wantsJson()) return response()->json(["status"=> "exception", "error" => $exception->getMessage()]);
         return parent::render($request, $exception);
     }
 }

@@ -15,10 +15,15 @@ class RedirectIfAuthenticated
      * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null)
-    {
+    public function handle($request, Closure $next, $guard = null) {
         if (Auth::guard($guard)->check()) {
-            return redirect('/home');
+            if($request->wantsJson()) {
+                return response()->json([
+                    'pass' => csrf_token(),
+                    'user' => \Auth::user(),
+                ]);
+            }
+            return redirect('/shift');
         }
 
         return $next($request);

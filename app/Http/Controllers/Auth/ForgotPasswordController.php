@@ -29,4 +29,21 @@ class ForgotPasswordController extends Controller
     {
         $this->middleware('guest');
     }
+
+    //override trait
+    protected function sendResetLinkResponse(Request $request, $response) {
+        if($request->wantsJson())
+            return response()->json(['status' => trans($response)]);
+        return back()->with('status', trans($response));
+    }
+
+    //override trait
+    protected function sendResetLinkFailedResponse(Request $request, $response) {
+        if($request->wantsJson())
+            return response()->json(['status' => trans($response)]);
+
+        return back()->withErrors(
+            ['email' => trans($response)]
+        );
+    }
 }
