@@ -11,7 +11,7 @@ class ShiftController extends Controller {
         $allowedRole= array('SUPER', 'MANAGER', 'VALET', 'CUSTOMEr');
         $this->middleware(['fhkAuth:super,none'], ['allow' => ['ALL'], 'restrict'=>$allowedRole]);
         $this->middleware(['fhkAuth:manager,api'], ['allow' => ['ALL'], 'restrict'=>$allowedRole]);
-        $this->middleware(['fhkAuth:valet,api'], ['allow' => ['index', 'show', 'shiftApproval'], 'restrict'=>$allowedRole]);
+        $this->middleware(['fhkAuth:valet,api'], ['allow' => ['index', 'show', 'shiftFilter'], 'restrict'=>$allowedRole]);
         $this->middleware(['fhkAuth:customer,api'], ['allow' => ['index', 'show'], 'restrict'=>$allowedRole]);
     }
 
@@ -29,6 +29,28 @@ class ShiftController extends Controller {
         return response()->json(Shift::with('sites')->orderBy('dateTag', 'ASC')->get());
     }
 
+    public function shiftFilter(Request $request) {
+      $d= $request->input();
+
+      if(!array_key_exists("user_id", $d))
+        return response()->json(["status" => "failed", "message" => "You must specify a user field!" ]);
+
+      else if($d["all"]===true)
+        return response()->json(Shift::with('sites')->where(['user_id' => $d["user_id"]])->get());
+
+      else if($d["shift_id"])
+        return response()->json(Shift::with('sites')->where(['user_id' => $d["user_id"], "id" => $d["shift_id"]])->get());
+
+      else if($d["date"])
+        return response()->json(Shift::with('sites')->where([
+          ['user_id', '=', $d["user_id"]],
+          ['dateTag', 'LIKE', "%".$d["date"]."%"]
+        ])->get());
+
+      else
+        return response()->json(["status" => "failed", "message" => "API syntax error!" ]);
+    }
+
     public function show(Request $request, $id) {
         //var_dump($_POST);
         if(!$request->wantsJson())
@@ -39,7 +61,6 @@ class ShiftController extends Controller {
     public function store(Request $request) {
         if(!$this->isValid($request->all()))
             return response()->json(["error" => "Check your arguments."]);
-
         $data= $request->all();
         $binds= null;
         if(array_key_exists('binds', $data)) {

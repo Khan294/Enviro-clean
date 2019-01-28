@@ -28,7 +28,7 @@ class FenceController extends Controller {
     public function index(Request $request) {
         if(!$request->wantsJson())
             return view('fence');
-        return response()->json(Fence::all());
+        return response()->json(Fence::with(["site"])->get());
     }
 
     public function show(Request $request, $id) {

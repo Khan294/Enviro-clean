@@ -49,9 +49,8 @@
                       </thead>
                       <tbody>
                         <tr class="oneRow" ng-repeat="(header, value) in (inst.list.data)">
-                          <td>[{value.roomName}]
-                          <!--<i ng-click="ui.editRow(inst.list, $index);" class="fa fa-edit fa-fw"></i>-->
-                          <span style="float:right;"> <i ng-click="ui.openchat(header)" class="fa fa-comments fa-fw"></i> </span></td>
+                          <td>[{value.chatName}]
+                          <span style="float:right;"> <i ng-click="ui.editRow(inst.list, $index);" class="fa fa-edit fa-fw"></i><i ng-click="ui.openchat()" class="fa fa-comments fa-fw"></i> </span></td>
                         </tr>
                       </tbody>
                   </table>
@@ -72,16 +71,14 @@
           </div>
           <div class="panel-body">
               <div style="width:100%">
-                  <label>Group name</label> <input class="form-control" type="text" ng-model="ui.fbNewRoomName">
-                  <!--
+                  <label>Group name</label> <input class="form-control" type="text" ng-model="inst.temp.chatName">
                   <label>Users </label> <select class="form-control" title="Select multiple users for a shift." ng-model="inst.temp.binds" multiple="">
                       <option class="expand" ng-repeat="(header, value) in (inst.lookUp.data)" ng-value="value.id">[{value.name}]</option>
                   </select>
-                  -->
               </div>
 
               <div style="width:30%; float:right; display:inline-block; margin:7px">
-                  <button class="btn" style="float:right; clear:none;" ng-click="ui.fbCreateRoom()">[{ui.isEdit? "Save": "Add"}]</button>
+                  <button class="btn" style="float:right; clear:none;" ng-click="ui.sendData(inst.list, '#image')">[{ui.isEdit? "Save": "Add"}]</button>
                   <span ng-if="ui.isEdit">
                   <button class="btn" style="float:right; clear:none;" ng-click="ui.deleteItem(inst.list, inst.list.current);">Remove</button>
                   </span>
@@ -122,19 +119,7 @@
       $('#dataTables-example_filter').css('float','right');
   });
   -->
-  <script src="https://www.gstatic.com/firebasejs/3.5.3/firebase.js"></script>
-
   <script type="text/javascript">
-      var config = {
-        apiKey: "AIzaSyDJJWn71rtqQkfCIHQgRBcnMNn0jH_IE3M",
-        //authDomain: "myfirstproject-aa58b.firebaseapp.com",
-        databaseURL: "https://envirochatbase.firebaseio.com",
-        //storageBucket: "myfirstproject-aa58b.appspot.com",
-        //messagingSenderId: "348382597969"
-      };
-      firebase.initializeApp(config);
-      const ref= firebase.database().ref();
-
       app.controller('chat', function($scope, $http, Utility, Resource) {
         //$scope.base= Resource.base;
         $scope.inst= {temp:{}, list: {current:0, data:[]}, lookUp: {current:0, data:[]}};
@@ -143,27 +128,27 @@
         };
       
       $scope.loader= function(){
-        ref.on("value", function(snapshot) {
-          $scope.inst.list.data= snapshot.val().chatRooms;
-          //$scope.$apply();
-          $scope.$evalAsync();
-          //console.log($scope.inst.list.data);
-        }, function (errorObject) {
-          console.log("The read failed: " + errorObject.code);
+        $scope.inst.temp= Utility.clone($scope.model.primary);
+        Resource.api("chat", "get", null, null, function(res){
+          res.data.forEach(function(item, index) {
+            item.binds= [];
+            item.users.forEach(function(bind, idx){
+              item.binds.push(bind.id);
+            });
+          });
+          $scope.inst.list.data= res.data;
+          console.log($scope.inst.list.data);
+        });
+        Resource.api("user", "get", null, null, function(res){
+          $scope.inst.lookUp.data= res.data;
         });
       };
 
       $scope.ui= {
         isEdit: false,
         displayMessage: "",
-        fbNewRoomName: "",
-        fbCreateRoom: function(){
-          ref.child('chatRooms').push(
-            {"roomName": $scope.ui.fbNewRoomName, "lastMessage": {"type": "nan","content": "","sender": ""}}
-          )
-        },
-        openchat: function(header) {
-          window.open("{{ url('chatPop') }}/" + header, "_blank", "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=400,height=400");
+        openchat: function() {
+          window.open("{{ url('chatPop') }}", "_blank", "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=400,height=400");
         },
         showError(message){
             this.displayMessage= message;

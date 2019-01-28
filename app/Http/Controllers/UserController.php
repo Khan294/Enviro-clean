@@ -22,9 +22,9 @@ class UserController extends Controller {
     public function __construct() {
         $allowedRole= array('SUPER', 'MANAGER', 'VALET', 'CUSTOMEr');
         $this->middleware(['fhkAuth:super,none'], ['allow' => ['ALL'], 'restrict'=>$allowedRole]);
-        $this->middleware(['fhkAuth:manager,api'], ['allow' => ['index', 'show'], 'restrict'=>$allowedRole]);
-        $this->middleware(['fhkAuth:valet,api'], ['allow' => ['index', 'show'], 'restrict'=>$allowedRole]);
-        $this->middleware(['fhkAuth:customer,api'], ['allow' => ['index', 'show'], 'restrict'=>$allowedRole]);
+        $this->middleware(['fhkAuth:manager,api'], ['allow' => ['index', 'show', 'getRole'], 'restrict'=>$allowedRole]);
+        $this->middleware(['fhkAuth:valet,api'], ['allow' => ['index', 'show', 'getRole'], 'restrict'=>$allowedRole]);
+        $this->middleware(['fhkAuth:customer,api'], ['allow' => ['index', 'show', 'getRole'], 'restrict'=>$allowedRole]);
     }
 
     public function isValid($fields){
@@ -32,9 +32,9 @@ class UserController extends Controller {
             'name' => 'required',
             'email' => 'required',
             'type' => 'required',
-            //'password' => 'required',
             'contact' => 'required',
             'wage' => 'required',
+            //'password' => 'required',
             //'image' => 'required',
             //'files' => 'mimes:jpeg,bmp,png,jpg',
         ])->fails()? false: true;
@@ -45,6 +45,14 @@ class UserController extends Controller {
       if(!$request->wantsJson())
           return view('user');
       return response()->json(User::all());
+    }
+
+    public function getRole(Request $request, $role) {
+      //$this->informUser(User::find(1), "1234567");
+      if(strtoupper($role) == "ALL")
+        return response()->json(User::all());
+      else
+        return response()->json(User::where("type", $role)->get());
     }
 
     public function show(Request $request, $id) {

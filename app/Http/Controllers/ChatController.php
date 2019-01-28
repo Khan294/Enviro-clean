@@ -27,6 +27,11 @@ class ChatController extends Controller {
         return response()->json(Chat::with('users')->get());
     }
 
+    public function chatPop(Request $request, $header) {
+      $user= \Auth::user();
+      return view('chatPop', ["header" => $header, "username" => $user->name, "id" => $user->id]);
+    }
+
     public function show(Request $request, $id) {
         if(!$request->wantsJson())
             return response()->json(["error" => "Web interface not supported."]);

@@ -12,6 +12,6 @@ class Fence extends Model {
     }
 
 	public function site() {
-        return $this->belongsToMany('\App\Site');
+        return $this->belongsTo('\App\Site');
     }
 }

@@ -102,7 +102,7 @@ class RegisterController extends Controller
         $this->guard()->login($user);
 
         if($request->wantsJson())
-            return response()->json(['status' => 'registered']);
+            return response()->json(['status' => 'registered', 'user' => $user, 'token' => csrf_token()]);
         return redirect($this->redirectPath());
 
         //return $this->registered($request, $user) ?: redirect($this->redirectPath());

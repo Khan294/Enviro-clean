@@ -28,7 +28,7 @@ class SiteController extends Controller {
     public function index(Request $request) {
         if(!$request->wantsJson())
             return view('site');
-        return response()->json(Site::all());
+        return response()->json(Site::with(["region"])->get());
     }
 
     public function show(Request $request, $id) {

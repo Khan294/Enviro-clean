@@ -24,7 +24,7 @@ class RegionController extends Controller {
     public function index(Request $request) {
         if(!$request->wantsJson())
             return view('region');
-        return response()->json(Region::all());
+        return response()->json(Region::with(["user"])->get()); //::all()
     }
 
     public function show(Request $request, $id) {

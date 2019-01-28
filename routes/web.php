@@ -28,7 +28,10 @@ Route::get('/', function () {return view('login');});
 
 Route::resource('chat', 'ChatController');
 Route::resource('shift', 'ShiftController');
+Route::post('shiftFilter', 'ShiftController@shiftFilter');
 Route::resource('user', 'UserController');
+Route::get('roledUser/{role}', 'UserController@getRole');
+
 Route::resource('region', 'RegionController');
 Route::resource('site', 'SiteController');
 Route::resource('fence', 'FenceController');
@@ -40,4 +43,4 @@ Route::resource('fenceclock', 'FenceClockController');
 Route::get('dashboard', 'DashboardController@index');
 Route::get('downloadCsv', 'ViolationController@downloadCsv');
 Route::get('downloadJson', 'ViolationController@downloadJson');
-Route::get('/chatPop', function () {return view('chatPop');});
+Route::get('/chatPop/{header}', 'ChatController@chatPop');

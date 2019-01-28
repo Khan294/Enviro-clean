@@ -9,7 +9,7 @@ class Site extends Model {
     protected $fillable = ['siteName', 'address', 'lng', 'lat', 'rad', 'region_id', 'siteName'];
 
 	public function region() {
-        return $this->belongsToMany('\App\Region');
+        return $this->belongsTo('\App\Region');
     }
 
     public function fences(){
@@ -21,7 +21,7 @@ class Site extends Model {
     }
 
     public function shifts() {
-        return $this->belongsToMany('\App\Shift');
+        return $this->belongsTo('\App\Shift');
     }
 
     /*

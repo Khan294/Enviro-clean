@@ -281,7 +281,7 @@
         });
         app.factory('Resource', function(Utility) {
             return {
-                base: "http://demo.fahadhussainkhan.com/", //"http://enviroclean.com/",
+                base: "{{url('/')}}/", //"http://demo.fahadhussainkhan.com/",
                 api: function(controller, operation, data, files, callback){
                     if(operation=="get")
                         Utility.jsonApi(this.base+controller, "GET", null, callback);
