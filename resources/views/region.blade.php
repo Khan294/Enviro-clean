@@ -45,14 +45,12 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Manager</th>
                                 <th style="width:30px;"><i class="fa fa-cog"></i></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr class="oneRow" ng-repeat="(header, value) in (inst.list.data)">
                                 <td>[{value.regionName}]</td>
-                                <td>[{(inst.lookUp.data | filter:{id:value.user_id}:true)[0].name}]</td>
                                 <td> <span style="float:right;"> <i class="fa fa-edit" style="color:blue" ng-click="ui.editRow(inst.list, $index);"></i><i class="fa fa-trash" style="color:red" ng-click="ui.deleteItem(inst.list, $index)";></i> </span>
                                 </td>
                             </tr>
@@ -75,10 +73,6 @@
             <div class="panel-body">
                 <div style="width:100%">
                     <label>Name</label> <input class="form-control" type="text" ng-model="inst.temp.regionName">
-
-                    <label>Manager</label> <select class="form-control" ng-model="inst.temp.user_id">
-                        <option ng-repeat="(header, value) in (inst.lookUp.data)" ng-value="value.id">[{value.name}]</option>
-                    </select>
                 </div>
 
                 <div style="width:30%; float:right; display:inline-block;">
@@ -117,14 +111,11 @@
       //$scope.base= Resource.base;
       $scope.inst= {temp:{}, list: {current:0, data:[]}, lookUp: {current:0, data:[]}};
       $scope.model= {
-        primary: {id:null, regionName:"",  user_id:""}
+        primary: {id:null, regionName:""}
       };
       
       $scope.loader= function(){
         $scope.inst.temp= Utility.clone($scope.model.primary);
-        Resource.api("user", "get", null, null, function(res){
-            $scope.inst.lookUp.data= res.data;
-        });
         Resource.api("region", "get", null, null, function(res){
           //res.data.forEach(function(item){ });
           $scope.inst.list.data= res.data;

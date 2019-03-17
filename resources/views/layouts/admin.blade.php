@@ -25,9 +25,8 @@
 
     <style>
       .contentHeader {font-size: 2em;}
-      .fullloader {width: 100%; height:100%; position: absolute; z-index: 14; margin: auto; background:rgba(255,255,255,1);
-      background-repeat: no-repeat; background-position: center; background-image: url({{ asset("img/loader.gif") }});
-      background-size: 20% 45%;}
+      .fullloaderBg {width: 100%; height:100%; z-index: 14; position: fixed; background:rgba(255,255,255,1);}
+      .fullloader {width:50%; height:50%; z-index: 15; position: relative; top:23%; left:26%; color: #223f7c; background-repeat: no-repeat; background-position: 50% 50%; background-image: url({{ asset("img/loader.gif") }});background-size: 10% 20%;}
     </style>
     @yield('style')
 
@@ -41,7 +40,9 @@
     </head>
 
     <body ng-app="myApp">
-
+        <div class="fullloaderBg">
+          <div class="fullloader"></div>
+        </div>
         <div id="wrapper">
 
             <!-- Navigation -->
@@ -53,7 +54,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="{{ url('dashboard') }}"> EnviroClean</a>
+                    <a class="navbar-brand" href="{{ url('dashboard') }}"> <img style="width:80px; display:block; margin:auto; margin-bottom:10px" src="{{ asset('img/logo.png') }}" alt="Logo"></a>
                 </div>
                 <!-- /.navbar-header -->
 
@@ -142,9 +143,9 @@
                             </li>
                             <li>
                                 @if(Request::path() == 'violation')
-                                <a href="#" style="color:green"><i class="fa fa-shield fa-fw"></i> Violations</a>
+                                <a href="#" style="color:green"><i class="fa fa-file-image-o  fa-fw"></i> Gallery</a>
                                 @else
-                                <a href="{{ url('violation') }}"><i class="fa fa-shield fa-fw"></i> Violations</a>
+                                <a href="{{ url('violation') }}"><i class="fa fa-file-image-o  fa-fw"></i> Gallery</a>
                                 @endif
                             </li>
                             <li>
@@ -194,6 +195,7 @@
     <script type="text/javascript">
         angular.element(function () {
           document.getElementsByClassName('fullloader')[0].setAttribute("style", "display:none");
+          document.getElementsByClassName('fullloaderBg')[0].setAttribute("style", "display:none");
         });
         var app = angular.module('myApp', ['ngSanitize']).config(function($interpolateProvider){
             $interpolateProvider.startSymbol('[{').endSymbol('}]');

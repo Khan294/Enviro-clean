@@ -52,6 +52,7 @@
                                 <th>Phone Number</th>
                                 <th>Positions</th>
                                 <th>Wages</th>
+                                <th>Region</th>
                                 <th><i class="fa fa-cog"></i></th>
                             </tr>
                         </thead>
@@ -62,6 +63,7 @@
                                 <td>[{value.contact}]</td>
                                 <td class="center" style="overflow-x:hidden">[{value.type}]</td>
                                 <td class="center">[{value.wage}]</td>
+                                <td>[{(inst.regionLookUp.data | filter:{id:value.region_id}:true)[0].regionName}]</td>
                                 <td style="width:30px;"> <span style="float:right;"> <i class="fa fa-edit" style="color:blue" ng-click="ui.editRow(inst.list, $index);"></i><i class="fa fa-trash" style="color:red" ng-click="ui.deleteItem(inst.list, $index);"></i> </span>
                                 </td>
                             </tr>
@@ -100,6 +102,9 @@
                         <option>Customer</option>
                     </select>
                     <label>Wage</label> <input class="form-control" type="text" ng-model="inst.temp.wage">
+                    <label>Region</label> <select class="form-control" ng-model="inst.temp.region_id">
+                        <option ng-repeat="(header, value) in (inst.regionLookUp.data)" ng-value="value.id">[{value.regionName}]</option>
+                    </select>
                     <div style="width:30%; float:right; display:inline-block;">
                       <br/>
                       <button class="btn" style="float:right; clear:none;" ng-click="ui.sendData(inst.list, '#image')">[{ui.isEdit? "Edit": "Add"}]</button> 
@@ -147,9 +152,9 @@
 
     app.controller('user', function($scope, $http, Utility, Resource) {
       //$scope.base= Resource.base;
-      $scope.inst= {temp:{}, list: {current:0, data:[]}};
+      $scope.inst= {temp:{}, list: {current:0, data:[]}, regionLookUp: {current:0, data:[]}};
       $scope.model= {
-        primary: {id:null, name:"",  email:"", type:"", password:"", contact:"", wage:"", image: ""}
+        primary: {id:null, name:"",  email:"", type:"", password:"", contact:"", wage:"", image: "", region_id: ""}
       };
       
       $scope.loader= function(){
@@ -159,6 +164,11 @@
             item.password="";
           })
           $scope.inst.list.data= res.data;
+        });
+
+        Resource.api("region", "get", null, null, function(res){
+          $scope.inst.regionLookUp.data= res.data;
+          $scope.inst.regionLookUp.current= $scope.inst.regionLookUp.data[0].id;
         });
       };
 

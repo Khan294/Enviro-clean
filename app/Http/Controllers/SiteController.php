@@ -31,6 +31,12 @@ class SiteController extends Controller {
         return response()->json(Site::with(["region"])->get());
     }
 
+    public function sitebyregion(Request $request, $id) {
+        if(!$request->wantsJson())
+            return view('site');
+        return response()->json(Site::where([["region_id", "=", $id]])->with(["region"])->get());
+    }
+
     public function show(Request $request, $id) {
         if(!$request->wantsJson())
             return response()->json(["error" => "Web interface not supported."]);

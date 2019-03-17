@@ -126,9 +126,11 @@
 
   <script type="text/javascript">
       var config = {
-        apiKey: "AIzaSyDJJWn71rtqQkfCIHQgRBcnMNn0jH_IE3M",
+        apiKey: "AIzaSyC-ApNeOez9weiOzhJ1FQ-ksek6pvQqwhg",
+        //apiKey: "AIzaSyDJJWn71rtqQkfCIHQgRBcnMNn0jH_IE3M",
         //authDomain: "myfirstproject-aa58b.firebaseapp.com",
-        databaseURL: "https://envirochatbase.firebaseio.com",
+        //databaseURL: "https://envirochatbase.firebaseio.com",
+        databaseURL: "https://enviro-demo.firebaseio.com/",
         //storageBucket: "myfirstproject-aa58b.appspot.com",
         //messagingSenderId: "348382597969"
       };

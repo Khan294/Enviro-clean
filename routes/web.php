@@ -30,12 +30,18 @@ Route::resource('chat', 'ChatController');
 Route::resource('shift', 'ShiftController');
 Route::post('shiftFilter', 'ShiftController@shiftFilter');
 Route::resource('user', 'UserController');
+Route::get('userbyregion/{id}', 'UserController@userbyregion');
+
 Route::get('roledUser/{role}', 'UserController@getRole');
 
 Route::resource('region', 'RegionController');
 Route::resource('site', 'SiteController');
+Route::get('sitebyregion/{id}', 'SiteController@sitebyregion');
+
 Route::resource('fence', 'FenceController');
 Route::resource('violation', 'ViolationController');
+Route::get('violationbysite/{id}', 'ViolationController@violationbysite');
+
 Route::resource('infraction', 'InfractionController');
 Route::resource('siteclock', 'SiteClockController');
 Route::resource('fenceclock', 'FenceClockController');
@@ -44,3 +50,7 @@ Route::get('dashboard', 'DashboardController@index');
 Route::get('downloadCsv', 'ViolationController@downloadCsv');
 Route::get('downloadJson', 'ViolationController@downloadJson');
 Route::get('/chatPop/{header}', 'ChatController@chatPop');
+
+Route::prefix('photo')->group(function () {
+  Route::get('/', "PhotoController@index");
+});

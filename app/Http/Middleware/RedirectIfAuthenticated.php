@@ -20,10 +20,10 @@ class RedirectIfAuthenticated
             if($request->wantsJson()) {
                 return response()->json([
                     'pass' => csrf_token(),
-                    'user' => \Auth::user(),
+                    'user' => \Auth::user() //->with("region")->first(),
                 ]);
             }
-            return redirect('/shift');
+            return redirect('/dashboard');
         }
 
         return $next($request);

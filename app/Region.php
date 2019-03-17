@@ -5,11 +5,11 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 
 class Region extends Model {
-	protected $fillable = ['regionName', 'user_id'];
+	protected $fillable = ['regionName'];
 
-	public function user() {
-        return $this->belongsTo('\App\User');
-  }
+  public function users(){
+        return $this->hasMany('\App\User');
+    }
 
   public function sites(){
       return $this->hasMany('\App\Site');

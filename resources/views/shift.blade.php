@@ -108,21 +108,25 @@
           <div class="panel panel-default">
               <div class="panel-heading">
                 <div style="text-align: center; font-size: 1.5em"> <b>[{cal.monName}], [{cal.year}] </b></div>
-                <div style="width:75%; display:inline-flex">
+                <br/>
+                <div style="width:50%; display:inline-flex">
                   <select class="form-control" title="Select month." style="width:30%; padding: 5px; max-width:140px" ng-model="cal.selectedMonth">
                     <option class="expand" ng-repeat="(header, value) in (cal.monthNames)" ng-value="$index">[{value}]</option>
                   </select>
                   <input style="margin-left:5px; width:25%; padding: 5px; max-width:70px" class="form-control" type="number" min="2018" ng-value="cal.selectedYear">
                   <button class="btn" style="margin-left:5px;"> <i class="fa fa-search"></i></button>
                 </div>
-                <div style="float:right;width:20%">
-                  <select class="form-control" title="You can select a valet from here." ng-model="inst.lookUp.current" ng-change="ui.updateCalendar()">
+                <div style="float:right;width:50%; display:flex;">
+                  <select class="form-control" title="You can select a region from here." ng-model="inst.regionLookUp.current" ng-change="ui.updateRegion()">
+                      <option class="expand" ng-repeat="(header, value) in (inst.regionLookUp.data)" ng-value="value.id">[{value.regionName}]</option>
+                  </select>
+                  <select ng-disabled="inst.lookUp.current<0" class="form-control" style="margin-left:10px" title="You can select a valet from here." ng-model="inst.lookUp.current" ng-change="ui.updateCalendar()">
                       <option class="expand" ng-repeat="(header, value) in (inst.lookUp.data)" ng-value="value.id">[{value.name}]</option>
                   </select>
                 </div>
               </div>
               <!-- /.panel-heading -->
-              <div class="panel-body">
+              <div class="panel-body" ng-hide="inst.lookUp.current<0">
                   <div class="">
                     <div class="calendar__header">
                       <div>sun</div>
@@ -223,10 +227,11 @@
  
     app.controller('shift', function($scope, $http, Resource, Utility, $timeout) {
       $scope.cal= {max:30, miss:4, mon:0, year:0};
-     $scope.inst= {temp:{}, list: {current:0, data:[]}, lookUp: {current:0, data:[]}, lookUp1: {current:0, data:[]}};
+     $scope.inst= {temp:{}, list: {current:0, data:[]}, lookUp: {current:0, data:[]}, lookUp1: {current:0, data:[]}, regionLookUp: {current:0, data:[]}};
       $scope.model= {
         primary: {id:null, dateTag:"",  timTag:"10:00:00", user_id:"", binds: []}
       };
+
       $scope.loader= function(){
         var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -245,17 +250,11 @@
         $scope.cal.selectedMonth= m;
         $scope.cal.selectedYear= y;
 
-        Resource.api("user", "get", null, null, function(res){
-            $scope.ui.initList($scope.inst.lookUp, res.data);
-            $scope.ui.updateCalendar();
-            console.log(res.data);
+        Resource.api("region", "get", null, null, function(res){
+            $scope.ui.initList($scope.inst.regionLookUp, res.data);
+            $scope.ui.updateValet();
+            $scope.ui.updateSites();
         });
-
-        Resource.api("site", "get", null, null, function(res) {
-            //res.data.forEach(function(item, index) { });
-            $scope.ui.initList($scope.inst.lookUp1, res.data);
-            console.log(res.data);
-          });
 
         $scope.inst.temp= Utility.clone($scope.model.primary);
       };
@@ -265,10 +264,32 @@
         displayMessage: "",
         initList: function(list, newDat){
           if(newDat==null || newDat==undefined) {
-            list= {current:0, data:[]};
+            list.current= -1;
+            list.data= {};
+            return;
+          } else if(newDat.length<1) {
+            list.current= -1;
+            list.data= {};
+            console.log("EMPTY");
             return;
           }
           list.data= newDat; list.current= list.data[0].id;
+        },
+        updateSites: function() {
+          Resource.api("sitebyregion/" + $scope.inst.regionLookUp.current, "get", null, null, function(res) {
+            $scope.ui.initList($scope.inst.lookUp1, res.data);
+          });
+        },
+        updateValet: function() {
+          Resource.api("userbyregion/" + $scope.inst.regionLookUp.current, "get", null, null, function(res){
+            $scope.ui.initList($scope.inst.lookUp, res.data);
+            $scope.ui.updateCalendar();
+            console.log($scope.inst.lookUp);
+          });          
+        },
+        updateRegion:function() { 
+          $scope.ui.updateValet();
+          $scope.ui.updateSites();
         },
         updateCalendar: function() {
           $scope.cal.shifts= {};

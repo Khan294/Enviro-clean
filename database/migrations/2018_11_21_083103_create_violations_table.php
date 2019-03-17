@@ -22,11 +22,14 @@ class CreateViolationsTable extends Migration
             $table->unsignedInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
 
-            $table->unsignedInteger('infraction_id');
+            $table->unsignedInteger('infraction_id')->nullable();
             $table->foreign('infraction_id')->references('id')->on('infractions')->onUpdate('cascade')->onDelete('cascade');
             
             $table->unsignedInteger('fence_id');
             $table->foreign('fence_id')->references('id')->on('fences')->onUpdate('cascade')->onDelete('cascade');
+
+            $table->unsignedInteger('photo_id');
+            $table->foreign('photo_id')->references('id')->on('photos')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

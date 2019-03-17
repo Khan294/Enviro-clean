@@ -32,8 +32,6 @@ class CreateShiftSiteTable extends Migration
      */
     public function down()
     {
-        Schema::table('shift_site', function (Blueprint $table) {
-            //
-        });
+      Schema::dropIfExists('shift_site');
     }
 }

@@ -34,6 +34,7 @@ class UserController extends Controller {
             'type' => 'required',
             'contact' => 'required',
             'wage' => 'required',
+            'region_id' => 'required',
             //'password' => 'required',
             //'image' => 'required',
             //'files' => 'mimes:jpeg,bmp,png,jpg',
@@ -44,7 +45,14 @@ class UserController extends Controller {
       //$this->informUser(User::find(1), "1234567");
       if(!$request->wantsJson())
           return view('user');
-      return response()->json(User::all());
+      return response()->json(User::with(["region"])->get());
+    }
+
+    public function userbyregion(Request $request, $id) {
+      //$this->informUser(User::find(1), "1234567");
+      if(!$request->wantsJson())
+          return view('user');
+      return response()->json(User::where([["region_id", "=", $id], ["type", "=", "Valet"]])->get());
     }
 
     public function getRole(Request $request, $role) {
@@ -100,7 +108,7 @@ class UserController extends Controller {
         }
 
         if($res->save()) {
-          $this->informUser($res, $password);
+          //$this->informUser($res, $password);
           return response()->json(["status" => "pass", "id"=>$res->id, "image"=>$res->image]);
         }
         return response()->json(["status" => "failed"]);

@@ -46,10 +46,10 @@ class LoginController extends Controller
 
         $this->clearLoginAttempts($request);
 
-        if($request->wantsJson()) return response()->json(['status' => 'success', 'user'=>\Auth::user(), 'token' => csrf_token()]);
+        if($request->wantsJson()) return response()->json(['status' => 'success', 'user'=>\Auth::user(), 'token' => csrf_token()]); //->with("region")->first()
 
-        return $this->authenticated($request, $this->guard()->user())
-                ?: redirect()->intended($this->redirectPath());
+        return redirect('/dashboard');
+        //return $this->authenticated($request, $this->guard()->user()) ?: redirect()->intended($this->redirectPath());
     }
 
     //overrid false response function in AuthenticatesUsers trait

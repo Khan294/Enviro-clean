@@ -17,14 +17,13 @@ class RegionController extends Controller {
     public function isValid($fields){
         return \Validator::make($fields, [
             'regionName' => 'required',
-            'user_id' => 'required',
         ])->fails()? false: true;
     }
 
     public function index(Request $request) {
         if(!$request->wantsJson())
             return view('region');
-        return response()->json(Region::with(["user"])->get()); //::all()
+        return response()->json(Region::all()); //::all()
     }
 
     public function show(Request $request, $id) {

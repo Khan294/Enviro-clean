@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Site extends Model {
 
-    protected $fillable = ['siteName', 'address', 'lng', 'lat', 'rad', 'region_id', 'siteName'];
+    protected $fillable = ['siteName', 'address', 'lng', 'lat', 'rad', 'region_id'];
 
 	public function region() {
         return $this->belongsTo('\App\Region');

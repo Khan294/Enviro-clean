@@ -28,7 +28,7 @@
 <div ng-controller="violation">
   <div class="row">
       <div class="col-lg-12">
-          <h1 class="page-header contentHeader"> Violation Report </h1>
+          <h1 class="page-header contentHeader"> Gallery </h1>
       </div>
       <!-- /.col-lg-12 -->
   </div>
@@ -38,8 +38,18 @@
           <div class="panel panel-default">
               <div class="panel-heading">
                   Report
+                  <div style="float:right;width:30%; margin-left: 10px; display:flex;">
+                    <select ng-change="ui.updateSite()" class="form-control" title="You can select a region from here." ng-model="inst.regionLookUp.current">
+                        <option class="expand" ng-repeat="(header, value) in (inst.regionLookUp.data)" ng-value="value.id">[{value.regionName}]</option>
+                    </select>
+                    <select style="margin-left:5px;" ng-change="ui.updateViolation()" class="form-control" title="You can select a region from here." ng-model="inst.lookUpSite.current">
+                        <option class="expand" ng-repeat="(header, value) in (inst.lookUpSite.data)" ng-value="value.id">[{value.siteName}]</option>
+                    </select>
+                  </div>
+
                   <a download="violations.json" class="btn btn-success" style="float:right; clear:none; position: relative" ng-href="[{ui.generateDownloadLink('json')}]"><i class="fa fa-database"></i> JSON</a>
                   <a download="violations.csv" class="btn btn-success" style="float:right; clear:none; position: relative" ng-href="[{ui.generateDownloadLink('csv')}]"><i class="fa fa-database"></i> CSV</a>
+
               </div>
               <!-- /.panel-heading -->
               <div class="panel-body">
@@ -48,6 +58,7 @@
                           <tr>
                               <th>Image</th>
                               <th>Valet</th>
+                              <th>Type</th>
                               <th>Infraction</th>
                               <th>Date</th>
                               <th>Fence</th>
@@ -63,6 +74,7 @@
                         <tr class="oneRow" ng-repeat="(header, value) in (inst.list.data)">
                           <td> <img id="violationImage" style="max-width: 100px; margin: auto" ng-click="ui.editRow(inst.list, $index)" ng-src="[{ui.fetchImage(value.image)}]"> </img> </td>
                           <td>[{(inst.lookUpUser.data | filter:{id:value.user_id}:true)[0].name}]</td>
+                          <td>[{(inst.lookUpPhoto.data | filter:{id:value.photo_id}:true)[0].photoType}]</td>
                           <td>[{(inst.lookUpInfraction.data | filter:{id:value.infraction_id}:true)[0].infractionName}]</td>
                           <td>[{value.created_at}]</td>
                           <td>[{(inst.lookUpFence.data | filter:{id:value.fence_id}:true)[0].fenceName}]</td>
@@ -128,34 +140,61 @@
 <script type="text/javascript">
     app.controller('violation', function($scope, $http, Utility, Resource) {
       //$scope.base= Resource.base;
-      $scope.inst= {temp:{}, list: {current:0, data:[]}, lookUpUser: {current:0, data:[]}, lookUpInfraction: {current:0, data:[]}, lookUpFence: {current:0, data:[]}};
+      $scope.inst= {temp:{}, list: {current:0, data:[]}, regionLookUp: {current:0, data:[]}, lookUpUser: {current:0, data:[]}, lookUpInfraction: {current:0, data:[]}, lookUpFence: {current:0, data:[]}, lookUpPhoto:{current:0, data:[]}, lookUpSite:{current:0, data:[]}};
       $scope.model= {
         primary: {id:null, user_id:"",  image:"", infraction_id:null, fence_id:null, created_at:""}
       };
       
       $scope.loader= function(){
         $scope.inst.temp= Utility.clone($scope.model.primary);
-        Resource.api("violation", "get", null, null, function(res){
-          console.log(res.data);
-          $scope.inst.list.data= res.data;
+        Resource.api("region", "get", null, null, function(res){
+          $scope.ui.initList($scope.inst.regionLookUp, res.data);
+          $scope.ui.updateSite();
         });
         Resource.api("user", "get", null, null, function(res){
-          console.log(res.data);
           $scope.inst.lookUpUser.data= res.data;
         });
+        
+        Resource.api("photo", "get", null, null, function(res){
+          $scope.inst.lookUpPhoto.data= res.data;
+        });
+
         Resource.api("infraction", "get", null, null, function(res){
-          console.log(res.data);
           $scope.inst.lookUpInfraction.data= res.data;
         });
+
         Resource.api("fence", "get", null, null, function(res){
-          console.log(res.data);
-          $scope.inst.lookUpFence.data= res.data;
+          $scope.ui.initList($scope.inst.lookUpFence, res.data);
         });
       };
 
       $scope.ui= {
         isEdit: false,
         displayMessage: "",
+        initList: function(list, newDat){
+          if(newDat==null || newDat==undefined) {
+            list.current= -1;
+            list.data= {};
+            return;
+          } else if(newDat.length<1) {
+            list.current= -1;
+            list.data= {};
+            console.log("EMPTY");
+            return;
+          }
+          list.data= newDat; list.current= list.data[0].id;
+        },
+        updateViolation: function(){
+          Resource.api("violationbysite/"+$scope.inst.lookUpSite.current, "get", null, null, function(res){
+            $scope.ui.initList($scope.inst.list, res.data);
+          });
+        },
+        updateSite: function(){
+          Resource.api("sitebyregion/"+$scope.inst.regionLookUp.current, "get", null, null, function(res){
+            $scope.ui.initList($scope.inst.lookUpSite, res.data);
+            $scope.ui.updateViolation();
+          });
+        },
         generateDownloadLink: function(format){
           if(format=="csv")
             return Resource.base + "downloadCsv";

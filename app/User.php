@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'type', 'image', 'wage', 'contact'
+        'name', 'email', 'password', 'type', 'image', 'wage', 'contact', "region_id"
     ];
 
     /**
@@ -25,9 +25,9 @@ class User extends Authenticatable
      */
     protected $hidden = [ 'remember_token', 'password'];
 
-    public function regions(){
-        return $this->hasMany('\App\Region');
-    }
+    public function region() {
+        return $this->belongsTo('\App\Region');
+  }
 
     public function violations(){
         return $this->hasMany('\App\Violation');

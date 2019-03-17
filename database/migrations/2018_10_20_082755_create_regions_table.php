@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateChatUserTable extends Migration
+class CreateRegionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,15 @@ class CreateChatUserTable extends Migration
      */
     public function up()
     {
-        Schema::create('chat_user', function (Blueprint $table) {
+        Schema::create('regions', function (Blueprint $table) {
             $table->increments('id');
+            $table->timestamps();
+            $table->string('regionName')->unique();
 
-            $table->unsignedInteger('chat_id');
-            $table->foreign('chat_id')->references('id')->on('chats')->onUpdate('cascade')->onDelete('cascade');
-
+            /*
             $table->unsignedInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+            */
         });
     }
 
@@ -31,6 +32,6 @@ class CreateChatUserTable extends Migration
      */
     public function down()
     {
-      Schema::dropIfExists('chat_user');
+        Schema::dropIfExists('regions');
     }
 }

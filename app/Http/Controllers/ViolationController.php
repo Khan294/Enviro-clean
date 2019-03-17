@@ -17,17 +17,51 @@ class ViolationController extends Controller {
 
     public function isValid($fields){
         return \Validator::make($fields, [
-            'infraction_id' => 'required',
+            //'infraction_id' => 'required', not required any more
             'fence_id' => 'required',
             'user_id' => 'required',
             'unitNumber' => 'required',
+            'photo_id' => 'required',
         ])->fails()? false: true;
     }
 
     public function index(Request $request) {
         if(!$request->wantsJson())
             return view('violation');
-        return response()->json(Violation::with(['user', 'infraction', 'fence'])->get()); //::all()
+        return response()->json(Violation::with(['user', 'infraction', 'fence', ])->get()); //::all()
+    }
+
+    public function violationbysite(Request $request, $id) {
+        if(!$request->wantsJson())
+            return view('violation');
+
+        return response()->json(Violation::whereHas('fence', function($q1) use ($id) {
+          $q1->whereHas('site', function($q2) use ($id) {
+            $q2->where([
+              ["sites.id", "=", $id]
+            ]);
+            // $q2->whereHas('region', function($q3) use ($id) {
+            //   $q3->where([
+            //     ["regions.id", "=", $id]
+            //   ]);
+            // });
+          });
+        })->get());
+
+        //return response()->json(Violation::all());
+        /*
+        $c = Company::where('active','=',1)->whereHas('user', function($q)
+        {
+          $q->whereHas('group', function($q)
+          {
+            $q->whereIn('group.name_short', array('admin','user'));
+          });
+        })->get();*/
+        //$users = DB::select('select * from users where active = ?', [1]);
+        /*return response()->json(Violation::where([
+          ["site.fence.region.id", "=", $id]
+        ])->get());*/
+        //with(['fence.site.region'=> function($query) use ($id) {}])
     }
 
     protected function downloadFormat(){

@@ -42,6 +42,7 @@
                         <h3 class="panel-title">Please Sign In</h3>
                     </div>
                     <div class="panel-body">
+                      <img style="width:200px; display:block; margin:auto; margin-bottom:10px" src="{{ asset('img/logo.png') }}" alt="Logo">
                         <form role="form" method="POST" action="{{ route('login') }}">
                           @csrf
                             <fieldset>
