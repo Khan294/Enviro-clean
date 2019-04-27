@@ -28,7 +28,7 @@
       <div class=""> <!--col-lg-12-->
           <div class="panel panel-default">
               <div class="panel-heading">
-                  [{ui.roomData.group_name}]
+                  [{ui.getPersonName()}]
               </div>
               <!-- /.panel-heading -->
               <div class="panel-body">
@@ -78,25 +78,26 @@
   var rec = firebase.storage().ref();
 
   app.controller('chat', function($scope, $http, Utility, Resource, ROLE, ID, NAME) {
+    $scope.inst= {lookUp: {current:0, data:[]}};
     $scope.loader= function(){
+      Resource.api("user", "get", null, null, function(res){
+        res.data.forEach(function(item){ item.password=""; });
+        $scope.inst.lookUp.data= res.data;
+      });
       //$scope.ui.setupRecorder();
       ref.on("value", function(snapshot) {
-        $scope.ui.roomData= snapshot.child("Groups").child("{{urldecode($header)}}").val();
-        console.log($scope.ui.roomData);
-        fbGroup= snapshot.child("Groups").child("{{urldecode($header)}}").child("messaging");
+        //$scope.ui.roomData= snapshot.child("Chats").child("{{urldecode($header)}}").val();
+        //console.log($scope.ui.roomData);
+        fbGroup= snapshot.child("Chats");
         $("#chatArea").empty();
         fbGroup.forEach(obj => {
           item= obj.val();
           //console.log(item);
-          if(item.username!="{{$username}}"){
-            $("#chatArea").append('<span class="chatCard otherPerson">' + item.username + ": " + item.message + `<span style="color:teal">
-                `+item.date+ ", " + item.time +`
-              </span></span>
+          if(item.receiver==ID && item.sender=="{{urldecode($header)}}"){
+            $("#chatArea").append('<span class="chatCard otherPerson">' + $scope.ui.getUser(item.sender).name + ": " + item.message + `</span>
             `);
-          } else {
-            $("#chatArea").append('<span class="chatCard person">' + "You: " + item.message + `<span style="color:teal">
-                `+item.date+ ", " + item.time +`
-              </span></span>
+          } else if (item.sender==ID && item.receiver=="{{urldecode($header)}}"){
+            $("#chatArea").append('<span class="chatCard person">' + "You: " + item.message + `</span>
             `);
           }
         });
@@ -112,6 +113,18 @@
       messageSpace: "",
       mediaRecorder: null,
       recordColor: "green",
+      getUser: function(id){
+        return $scope.inst.lookUp.data.filter((item)=>{
+          return item.id==id;
+        })[0];
+      },
+      getPersonName: function(){
+        var otherUser= this.getUser({{urldecode($header)}});
+        if(otherUser)
+          return otherUser.name;
+        else
+          return "Guest"
+      },
       sendMessage: function(id){
         //console.log($(id).val());
         var today = new Date();
@@ -131,11 +144,14 @@
 
         if($scope.ui.messageSpace=="")
           return;
-        ref.child("Groups").child("{{urldecode($header)}}").child("messaging").push({
-          date: dated,
+        ref.child("Chats").push({
+          
+          isSeen: false,
           message: $scope.ui.messageSpace,
           time: timed,
-          username: NAME
+          date: dated,
+          sender: ID+"",
+          receiver: "{{urldecode($header)}}"
         });
         $scope.ui.messageSpace= ""
       },

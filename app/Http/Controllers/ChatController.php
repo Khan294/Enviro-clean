@@ -27,9 +27,31 @@ class ChatController extends Controller {
         return response()->json(Chat::with('users')->get());
     }
 
+    public function chatOne(Request $request) {
+        if(!$request->wantsJson())
+            return view('chatOne');
+        return response()->json(Chat::with('users')->get());
+    }
+
+    public function chatWalkie(Request $request) {
+        if(!$request->wantsJson())
+            return view('chatWalkie');
+        return response()->json(Chat::with('users')->get());
+    }
+    
     public function chatPop(Request $request, $header) {
       $user= \Auth::user();
       return view('chatPop', ["header" => $header, "username" => $user->name, "id" => $user->id]);
+    }
+
+    public function chatOnePop(Request $request, $header) {
+      $user= \Auth::user();
+      return view('chatOnePop', ["header" => $header, "username" => $user->name, "id" => $user->id]);
+    }
+
+    public function chatWalkiePop(Request $request, $header) {
+      $user= \Auth::user();
+      return view('chatWalkiePop', ["header" => $header, "username" => $user->name, "id" => $user->id]);
     }
 
     public function show(Request $request, $id) {

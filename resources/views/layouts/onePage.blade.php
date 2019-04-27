@@ -64,9 +64,12 @@
      <!-- Custom Theme JavaScript -->
      <script src=" {{ asset('vendor/sbAdmin/sb-admin-2.js') }} "></script>
 
+     <script src=" {{ asset('vendor/angular/angular.min.js') }} "></script>
+     <script src=" {{ asset('vendor/angular/angular-sanitize.min.js') }} "></script>
+  <!--
      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.7.5/angular-sanitize.min.js"></script>
-     
+     -->
      <!-- angular -->
     <script type="text/javascript">
         angular.element(function () {
@@ -98,6 +101,9 @@
           };
         });
         app.constant("CSRF_TOKEN", '{{ csrf_token() }}');
+        app.constant("ROLE", '{{ isset(Auth::user()->type)? Auth::user()->type:"Guest" }}');
+        app.constant("ID", '{{ isset(Auth::user()->id)? Auth::user()->id:null }}');
+        app.constant("NAME", '{{ isset(Auth::user()->name)? Auth::user()->name:null }}');
         app.factory('Utility', function($http, CSRF_TOKEN) {
             return {
                 

@@ -42,7 +42,7 @@
                   </div>
                   <div>
                       <input id="sendArea" class="form-control" type="text" ng-model="ui.messageSpace" onchange="angular.element(this).scope().ui.sendMessage('#sendArea')">
-                      <span id="speaker" ng-style="{'color': ui.recordColor}" class="fa fa-paper-plane errspan" ng-mousedown="ui.sendMessage('#sendArea')"></span>
+                      <span id="speaker" ng-style="{'color': ui.recordColor}" class="fa fa-microphone errspan" ng-mousedown="ui.startRecord()"ng-mouseup="ui.stopRecord()"></span>
                   </div>
               </div>
               <!-- /.panel-body -->
@@ -69,20 +69,18 @@
       $('#dataTables-example_filter').css('float','right');
   });
   var config = {
-    apiKey: "AIzaSyDJJWn71rtqQkfCIHQgRBcnMNn0jH_IE3M",
-    databaseURL: "https://envirochatbase.firebaseio.com/",
+    apiKey: "AIzaSyC-ApNeOez9weiOzhJ1FQ-ksek6pvQqwhg", 
+    databaseURL: "https://enviro-demo.firebaseio.com/",
     storageBucket: "gs://envirochatbase.appspot.com",
   };
   firebase.initializeApp(config);
   const ref= firebase.database().ref();
   var rec = firebase.storage().ref();
 
-  app.controller('chat', function($scope, $http, Utility, Resource, ROLE, ID, NAME) {
+  app.controller('chat', function($scope, $http, Utility, Resource) {
     $scope.loader= function(){
       //$scope.ui.setupRecorder();
       ref.on("value", function(snapshot) {
-        $scope.ui.roomData= snapshot.child("Groups").child("{{urldecode($header)}}").val();
-        console.log($scope.ui.roomData);
         fbGroup= snapshot.child("Groups").child("{{urldecode($header)}}").child("messaging");
         $("#chatArea").empty();
         fbGroup.forEach(obj => {
@@ -100,7 +98,7 @@
             `);
           }
         });
-        $("#chatArea").animate({scrollTop: $("#chatArea").prop("scrollHeight")});
+
         $scope.$evalAsync();
       }, function (errorObject) {
         console.log("The read failed: " + errorObject.code);
@@ -113,29 +111,12 @@
       mediaRecorder: null,
       recordColor: "green",
       sendMessage: function(id){
-        //console.log($(id).val());
-        var today = new Date();
-        var dd = today.getDate();
-        var mm = today.getMonth() + 1; //January is 0!
-        var yyyy = today.getFullYear();
-        if (dd < 10) dd = '0' + dd;
-        if (mm < 10) mm = '0' + mm;
-        var dated = dd + ' ' + mm + ', ' + yyyy;
-
-        var h = today.getHours();
-        var m = today.getMinutes();
-        var tlvehr = (h >= 12 ? ' PM' : ' AM')
-        if (m < 10)  m = '0' + m;
-        if (h < 10)  h = '0' + h;
-        var timed= h + ":" + m + tlvehr;
-
-        if($scope.ui.messageSpace=="")
-          return;
+        console.log($(id).val());
         ref.child("Groups").child("{{urldecode($header)}}").child("messaging").push({
-          date: dated,
+          date: "03 09, 2019",
           message: $scope.ui.messageSpace,
-          time: timed,
-          username: NAME
+          time: "03:51 pm",
+          username: "{{$username}}"
         });
         $scope.ui.messageSpace= ""
       },

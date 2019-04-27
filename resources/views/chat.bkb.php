@@ -49,7 +49,7 @@
                       </thead>
                       <tbody>
                         <tr class="oneRow" ng-repeat="(header, value) in (inst.list.data)">
-                          <td>[{value.group_name}] (by <span style="color:green">[{value.group_created_username}]</span>) 
+                          <td>[{value.group_name}] (by <span style="color:green">[{value.group_created_by}]</span>) 
                           <!--<i ng-click="ui.editRow(inst.list, $index);" class="fa fa-edit fa-fw"></i>-->
                           <span style="float:right;"> <i ng-click="ui.openchat(header)" class="fa fa-comments fa-fw"></i> </span></td>
                         </tr>
@@ -73,9 +73,11 @@
           <div class="panel-body">
               <div style="width:100%">
                   <label>Group name</label> <input class="form-control" type="text" ng-model="ui.fbNewRoomName">
+                  <!--
                   <label>Users </label> <select class="form-control" title="Select multiple users for a shift." ng-model="inst.temp.binds" multiple="">
                       <option class="expand" ng-repeat="(header, value) in (inst.lookUp.data)" ng-value="value.id">[{value.name}]</option>
                   </select>
+                  -->
               </div>
 
               <div style="width:30%; float:right; display:inline-block; margin:7px">
@@ -124,13 +126,13 @@
 
   <script type="text/javascript">
       var config = {
-        apiKey: "AIzaSyDJJWn71rtqQkfCIHQgRBcnMNn0jH_IE3M",
-        databaseURL: "https://envirochatbase.firebaseio.com/",
+        apiKey: "AIzaSyC-ApNeOez9weiOzhJ1FQ-ksek6pvQqwhg",
+        databaseURL: "https://enviro-demo.firebaseio.com/",
       };
       firebase.initializeApp(config);
       const ref= firebase.database().ref();
 
-      app.controller('chat', function($scope, $http, Utility, Resource, ROLE, ID, NAME) {
+      app.controller('chat', function($scope, $http, Utility, Resource) {
         //$scope.base= Resource.base;
         $scope.inst= {temp:{}, list: {current:0, data:[]}, lookUp: {current:0, data:[]}};
         $scope.model= {
@@ -138,13 +140,6 @@
         };
       
       $scope.loader= function(){
-        Resource.api("user", "get", null, null, function(res){
-          res.data.forEach(function(item){
-            item.password="";
-          })
-          $scope.inst.lookUp.data= res.data;
-        });
-
         ref.on("value", function(snapshot) {
           console.log(snapshot.val());
           $scope.inst.list.data= snapshot.val().Groups;
@@ -161,37 +156,9 @@
         displayMessage: "",
         fbNewRoomName: "",
         fbCreateRoom: function(){
-          this.hideModal("#entryForm");
-
-          var today = new Date();
-          var dd = today.getDate();
-          var mm = today.getMonth() + 1; //January is 0!
-          var yyyy = today.getFullYear();
-          if (dd < 10) dd = '0' + dd;
-          if (mm < 10) mm = '0' + mm;
-          var dated = dd + ' ' + mm + ', ' + yyyy;
-
-          var h = today.getHours();
-          var m = today.getMinutes();
-          var tlvehr = (h >= 12 ? ' PM' : ' AM')
-          if (m < 10)  m = '0' + m;
-          if (h < 10)  h = '0' + h;
-          var timed= h + ":" + m + tlvehr;
-          //create a group
-          ref.child('Groups').child($scope.ui.fbNewRoomName).set(
-            {"group_created_date": dated, "group_created_time": timed, "group_created_user_regionId": ID, "group_created_username": NAME, "group_name": $scope.ui.fbNewRoomName, "member": null, "messaging": null}
-          );
-
-          //push members
-          //for each bind get user name for id and push it
-          for(i=0; i<$scope.inst.temp.binds.length; i++) {
-            var oneObj = $scope.inst.lookUp.data.filter((item)=>{
-              return item.id==$scope.inst.temp.binds[i];
-            })[0];
-            ref.child('Groups').child($scope.ui.fbNewRoomName).child("member").push(
-              {"username": oneObj.name}
-            );
-          }
+          ref.child('chatRooms').push(
+            {"roomName": $scope.ui.fbNewRoomName, "lastMessage": {"type": "nan","content": "","sender": ""}}
+          )
         },
         openchat: function(header) {
           window.open("{{ url('chatPop') }}/" + header, "_blank", "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=400,height=400");

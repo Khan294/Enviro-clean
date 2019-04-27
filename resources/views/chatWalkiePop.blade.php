@@ -3,7 +3,7 @@
 @section('style')
 <style type="text/css">
     .panel {margin:0px; height:100vh; width: 100%; position: absolute; overflow-y:scroll}
-    .errspan {font-size:20px; float: right; margin-right: 6px; margin-top: -25px; position: relative; z-index: 2; margin-left:10px}
+    .errspan {z-index: 2; font-size: 30px;}
     .chatCard {background: red; border-radius: 7px; padding:5px; color:white; clear:both; width:70%; margin-bottom: 7px;}
     .otherPerson{float:left;   background: #c7cbd0;}
     .person{float:right; background: #84b7ea;}
@@ -40,9 +40,10 @@
                       -->
                       <!-- -->
                   </div>
-                  <div>
-                      <input id="sendArea" class="form-control" type="text" ng-model="ui.messageSpace" onchange="angular.element(this).scope().ui.sendMessage('#sendArea')">
-                      <span id="speaker" ng-style="{'color': ui.recordColor}" class="fa fa-paper-plane errspan" ng-mousedown="ui.sendMessage('#sendArea')"></span>
+                  <div style="text-align: center;">
+                    <span id="speaker" ng-style="{'color': ui.recordColor}" class="fa fa-microphone errspan" ng-mousedown="ui.startRecord()" ng-mouseup="ui.stopRecord()"></span>
+                    <!--
+                    <input id="sendArea" class="form-control" type="text" ng-model="ui.messageSpace" onchange="angular.element(this).scope().ui.sendMessage('#sendArea')"> -->
                   </div>
               </div>
               <!-- /.panel-body -->
@@ -79,25 +80,31 @@
 
   app.controller('chat', function($scope, $http, Utility, Resource, ROLE, ID, NAME) {
     $scope.loader= function(){
-      //$scope.ui.setupRecorder();
+      $scope.ui.setupRecorder();
       ref.on("value", function(snapshot) {
-        $scope.ui.roomData= snapshot.child("Groups").child("{{urldecode($header)}}").val();
+        $scope.ui.roomData= snapshot.child("Walkie_Talkie_Groups").child("{{urldecode($header)}}").val();
         console.log($scope.ui.roomData);
-        fbGroup= snapshot.child("Groups").child("{{urldecode($header)}}").child("messaging");
+        fbGroup= snapshot.child("Walkie_Talkie_Groups").child("{{urldecode($header)}}").child("audio_messages");
         $("#chatArea").empty();
         fbGroup.forEach(obj => {
           item= obj.val();
-          //console.log(item);
+          console.log(item);
+
           if(item.username!="{{$username}}"){
-            $("#chatArea").append('<span class="chatCard otherPerson">' + item.username + ": " + item.message + `<span style="color:teal">
-                `+item.date+ ", " + item.time +`
+            /*
+            $("#chatArea").append('<span class="chatCard otherPerson">' + item.username + ": " + item.audio + `<span style="color:teal">
+                `+item.created_date+ ", " + item.created_time +`
               </span></span>
             `);
+            */
+            $("#chatArea").append('<span class="chatCard otherPerson"> '+ item.username +': <br/>' + ' <audio controls style="width:100%;"> <source src="'+ item.audio+'" type="audio/mpeg"> </audio> <br/><span style="color:teal; float: left">'+item.created_date+ ", " + item.created_time +'</span></span>');
           } else {
-            $("#chatArea").append('<span class="chatCard person">' + "You: " + item.message + `<span style="color:teal">
-                `+item.date+ ", " + item.time +`
+            /*
+            $("#chatArea").append('<span class="chatCard person">' + "You: " + item.audio + `<span style="color:teal">
+                `+item.created_date+ ", " + item.created_time +`
               </span></span>
-            `);
+            `);*/
+            $("#chatArea").append('<span class="chatCard person"> You: <br/>' + ' <audio controls style="width:100%;"> <source src="'+ item.audio+'" type="audio/mpeg"> </audio> <br/><span style="color:teal; float: right">'+item.created_date+ ", " + item.created_time +'</span></span>');
           }
         });
         $("#chatArea").animate({scrollTop: $("#chatArea").prop("scrollHeight")});
@@ -114,31 +121,10 @@
       recordColor: "green",
       sendMessage: function(id){
         //console.log($(id).val());
-        var today = new Date();
-        var dd = today.getDate();
-        var mm = today.getMonth() + 1; //January is 0!
-        var yyyy = today.getFullYear();
-        if (dd < 10) dd = '0' + dd;
-        if (mm < 10) mm = '0' + mm;
-        var dated = dd + ' ' + mm + ', ' + yyyy;
-
-        var h = today.getHours();
-        var m = today.getMinutes();
-        var tlvehr = (h >= 12 ? ' PM' : ' AM')
-        if (m < 10)  m = '0' + m;
-        if (h < 10)  h = '0' + h;
-        var timed= h + ":" + m + tlvehr;
-
-        if($scope.ui.messageSpace=="")
-          return;
-        ref.child("Groups").child("{{urldecode($header)}}").child("messaging").push({
-          date: dated,
-          message: $scope.ui.messageSpace,
-          time: timed,
-          username: NAME
-        });
-        $scope.ui.messageSpace= ""
+        
+        //$scope.ui.messageSpace= ""
       },
+      //chrome://flags/#unsafely-treat-insecure-origin-as-secure
       setupRecorder: function() {
         //chrome://flags/#unsafely-treat-insecure-origin-as-secure
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
@@ -161,13 +147,40 @@
             audio.src= URL.createObjectURL(blob);
             audio.play();
             
-            rec.child("recordings/recording.mp3").put(new File([blob], "recording.mp3"), {contentType: 'audio/mpeg-3'}).then(function(snapshot) {
+            var fileName= ((new Date().valueOf())+ Math.floor(1000000000 + Math.random() * 9000000000)) + ".mp3"
+            rec.child("recordings/"+fileName).put(new File([blob], fileName), {contentType: 'audio/mpeg-3'}).then(function(snapshot) {
+                var today = new Date();
+                var dd = today.getDate();
+                var mm = today.getMonth() + 1; //January is 0!
+                var yyyy = today.getFullYear();
+                if (dd < 10) dd = '0' + dd;
+                if (mm < 10) mm = '0' + mm;
+                var dated = dd + ' ' + mm + ', ' + yyyy;
+
+                var h = today.getHours();
+                var m = today.getMinutes();
+                var tlvehr = (h >= 12 ? ' PM' : ' AM')
+                if (m < 10)  m = '0' + m;
+                if (h < 10)  h = '0' + h;
+                var timed= h + ":" + m + tlvehr;
+
+                ref.child("Walkie_Talkie_Groups").child("{{urldecode($header)}}").child("audio_messages").push({
+                  created_date: dated,
+                  audio: snapshot.downloadURL,
+                  created_time: timed,
+                  username: NAME
+                });
+
+                /*
                 ref.child("chatRooms").child("{{$header}}").child("lastMessage").set(
                   {"type": "audio", "content": snapshot.downloadURL, "sender": "{{$username}}", "id": "{{$id}}"}
                 );
                 $("#chatArea").append('<span class="chatCard person">' + $scope.ui.roomData.lastMessage.sender + ' <audio controls style="width:200px;"> <source src="'+$scope.ui.roomData.lastMessage.content+'" type="audio/mpeg"> </audio></span>');
+                */
             });
           });
+        }).catch(function(err) {
+          alert("Media security issue.");
         });
       },
       startRecord: function(){

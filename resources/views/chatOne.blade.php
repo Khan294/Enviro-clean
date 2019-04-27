@@ -49,9 +49,9 @@
                       </thead>
                       <tbody>
                         <tr class="oneRow" ng-repeat="(header, value) in (inst.list.data)">
-                          <td>[{value.group_name}] (by <span style="color:green">[{value.group_created_username}]</span>) 
+                          <td>[{ui.getUser(value.id).name}] 
                           <!--<i ng-click="ui.editRow(inst.list, $index);" class="fa fa-edit fa-fw"></i>-->
-                          <span style="float:right;"> <i ng-click="ui.openchat(header)" class="fa fa-comments fa-fw"></i> </span></td>
+                          <span style="float:right;"> <i ng-click="ui.openchat(value.id)" class="fa fa-comments fa-fw"></i> </span></td>
                         </tr>
                       </tbody>
                   </table>
@@ -72,8 +72,9 @@
           </div>
           <div class="panel-body">
               <div style="width:100%">
-                  <label>Group name</label> <input class="form-control" type="text" ng-model="ui.fbNewRoomName">
-                  <label>Users </label> <select class="form-control" title="Select multiple users for a shift." ng-model="inst.temp.binds" multiple="">
+                  <!--
+                  <label>Group name</label> <input class="form-control" type="text" ng-model="ui.fbNewRoomName"> -->
+                  <label>Users </label> <select class="form-control" title="Select multiple users for a shift." ng-model="inst.lookUp.current">
                       <option class="expand" ng-repeat="(header, value) in (inst.lookUp.data)" ng-value="value.id">[{value.name}]</option>
                   </select>
               </div>
@@ -139,15 +140,24 @@
       
       $scope.loader= function(){
         Resource.api("user", "get", null, null, function(res){
-          res.data.forEach(function(item){
-            item.password="";
-          })
+          for(i = res.data.length-1; i >= 0 ; i--) {
+            res.data[i].password="";
+            if(res.data[i].id == ID) {
+              res.data.splice(i, 1);
+              break;
+            }
+          }
           $scope.inst.lookUp.data= res.data;
+          $scope.inst.lookUp.current= $scope.inst.lookUp.data[0].id;
         });
 
         ref.on("value", function(snapshot) {
           console.log(snapshot.val());
-          $scope.inst.list.data= snapshot.val().Groups;
+          $scope.inst.list.data= [];
+          fbGroup= snapshot.child("Chatlist").child(ID+"");
+          fbGroup.forEach(function(item){
+            $scope.inst.list.data.push({id:item.val().id})
+          });
           //$scope.$apply();
           $scope.$evalAsync();
           //console.log($scope.inst.list.data);
@@ -160,6 +170,11 @@
         isEdit: false,
         displayMessage: "",
         fbNewRoomName: "",
+        getUser: function(id){
+          return $scope.inst.lookUp.data.filter((item)=>{
+            return item.id==id;
+          })[0];
+        },
         fbCreateRoom: function(){
           this.hideModal("#entryForm");
 
@@ -177,24 +192,21 @@
           if (m < 10)  m = '0' + m;
           if (h < 10)  h = '0' + h;
           var timed= h + ":" + m + tlvehr;
-          //create a group
-          ref.child('Groups').child($scope.ui.fbNewRoomName).set(
-            {"group_created_date": dated, "group_created_time": timed, "group_created_user_regionId": ID, "group_created_username": NAME, "group_name": $scope.ui.fbNewRoomName, "member": null, "messaging": null}
-          );
 
-          //push members
-          //for each bind get user name for id and push it
-          for(i=0; i<$scope.inst.temp.binds.length; i++) {
-            var oneObj = $scope.inst.lookUp.data.filter((item)=>{
-              return item.id==$scope.inst.temp.binds[i];
-            })[0];
-            ref.child('Groups').child($scope.ui.fbNewRoomName).child("member").push(
-              {"username": oneObj.name}
-            );
-          }
+          //alert($scope.inst.lookUp.current);
+          //console.log(.val());
+          console.log(ID, $scope.inst.lookUp.current);
+          //console.log(.val());
+          /*
+          var toPush= pushpa.val();
+          toPush[$scope.inst.lookUp.current] = {
+            "id":$scope.inst.lookUp.current+""
+          };*/
+          ref.child('Chatlist').child(ID).child($scope.inst.lookUp.current).child("id").set($scope.inst.lookUp.current+"");
+          ref.child('Chatlist').child($scope.inst.lookUp.current).child(ID).child("id").set(ID+"");
         },
         openchat: function(header) {
-          window.open("{{ url('chatPop') }}/" + header, "_blank", "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=400,height=400");
+          window.open("{{ url('chatOnePop') }}/" + header, "_blank", "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=400,height=400");
         },
         showError(message){
             this.displayMessage= message;

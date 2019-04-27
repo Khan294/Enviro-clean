@@ -26,7 +26,6 @@ Route::post('register', 'Auth\RegisterController@register');
 Route::get('/token', 'Auth\LoginController@getToken');
 Route::get('/', function () {return view('login');});
 
-Route::resource('chat', 'ChatController');
 Route::resource('shift', 'ShiftController');
 Route::post('shiftFilter', 'ShiftController@shiftFilter');
 Route::resource('user', 'UserController');
@@ -49,7 +48,13 @@ Route::resource('fenceclock', 'FenceClockController');
 Route::get('dashboard', 'DashboardController@index');
 Route::get('downloadCsv', 'ViolationController@downloadCsv');
 Route::get('downloadJson', 'ViolationController@downloadJson');
+
+Route::resource('chat', 'ChatController');
 Route::get('/chatPop/{header}', 'ChatController@chatPop');
+Route::get('/chatWalkie', 'ChatController@chatWalkie');
+Route::get('/chatWalkiePop/{header}', 'ChatController@chatWalkiePop');
+Route::get('/chatOne', 'ChatController@chatOne');
+Route::get('/chatOnePop/{header}', 'ChatController@chatOnePop');
 
 Route::prefix('photo')->group(function () {
   Route::get('/', "PhotoController@index");

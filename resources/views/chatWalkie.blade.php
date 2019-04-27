@@ -147,7 +147,7 @@
 
         ref.on("value", function(snapshot) {
           console.log(snapshot.val());
-          $scope.inst.list.data= snapshot.val().Groups;
+          $scope.inst.list.data= snapshot.val().Walkie_Talkie_Groups;
           //$scope.$apply();
           $scope.$evalAsync();
           //console.log($scope.inst.list.data);
@@ -178,7 +178,7 @@
           if (h < 10)  h = '0' + h;
           var timed= h + ":" + m + tlvehr;
           //create a group
-          ref.child('Groups').child($scope.ui.fbNewRoomName).set(
+          ref.child('Walkie_Talkie_Groups').child($scope.ui.fbNewRoomName).set(
             {"group_created_date": dated, "group_created_time": timed, "group_created_user_regionId": ID, "group_created_username": NAME, "group_name": $scope.ui.fbNewRoomName, "member": null, "messaging": null}
           );
 
@@ -188,13 +188,13 @@
             var oneObj = $scope.inst.lookUp.data.filter((item)=>{
               return item.id==$scope.inst.temp.binds[i];
             })[0];
-            ref.child('Groups').child($scope.ui.fbNewRoomName).child("member").push(
+            ref.child('Walkie_Talkie_Groups').child($scope.ui.fbNewRoomName).child("member").push(
               {"username": oneObj.name}
             );
           }
         },
         openchat: function(header) {
-          window.open("{{ url('chatPop') }}/" + header, "_blank", "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=400,height=400");
+          window.open("{{ url('chatWalkiePop') }}/" + header, "_blank", "toolbar=no,scrollbars=no,resizable=yes,top=100,left=500,width=400,height=400");
         },
         showError(message){
             this.displayMessage= message;

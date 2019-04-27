@@ -143,17 +143,42 @@
                             </li>
                             <li>
                                 @if(Request::path() == 'violation')
-                                <a href="#" style="color:green"><i class="fa fa-file-image-o  fa-fw"></i> Gallery</a>
+                                <a href="#" style="color:green"><i class="fa fa-file-image-o  fa-fw"></i> Violation Report</a>
                                 @else
-                                <a href="{{ url('violation') }}"><i class="fa fa-file-image-o  fa-fw"></i> Gallery</a>
+                                <a href="{{ url('violation') }}"><i class="fa fa-file-image-o  fa-fw"></i> Violation Report</a>
                                 @endif
                             </li>
                             <li>
-                                @if(Request::path() == 'chat')
-                                <a href="#" style="color:green"><i class="fa fa-comments fa-fw"></i> Messenger</a>
+                                @if(in_array(Request::path(), array('chat', 'chatOne', 'chatWalkie')))
+                                <a href="#" style="color:green"><i class="fa fa-comments fa-fw"></i> Conversations<span class="fa arrow"></span></a>
                                 @else
-                                <a href="{{ url('chat') }}"><i class="fa fa-comments fa-fw"></i> Messenger</a>
+                                <a href="#"><i class="fa fa-comments fa-fw"></i> Conversations<span class="fa arrow"></span></a>
                                 @endif
+
+                                <ul class="nav nav-second-level collapse in">
+                                    <li>
+                                        @if(Request::path() == 'chatOne')
+                                        <a href="#" style="color:green"> Messaging </a>
+                                        @else
+                                        <a title="Private message someone." href="{{ url('chatOne') }}"> Messaging </a>
+                                        @endif
+                                    </li>
+                                    <li>
+                                        @if(Request::path() == 'chat')
+                                        <a href="#" style="color:green"> Group Chat </a>
+                                        @else
+                                        <a title="Group chats" href="{{ url('chat') }}"> Group Chat </a>
+                                        @endif
+                                    </li>
+                                    <li>
+                                        @if(Request::path() == 'chatWalkie')
+                                        <a href="#" style="color:green"> Walkie Talkie </a>
+                                        @else
+                                        <a title="Send voice messages." href="{{ url('chatWalkie') }}"> Walkie Talkie </a>
+                                        @endif
+                                    </li>
+                                </ul>
+                                <!-- /.nav-second-level -->
                             </li>
                         </ul>
                     </div>
@@ -187,9 +212,13 @@
 
      <!-- Custom Theme JavaScript -->
      <script src=" {{ asset('vendor/sbAdmin/sb-admin-2.js') }} "></script>
+     <script src=" {{ asset('vendor/angular/angular.min.js') }} "></script>
+     <script src=" {{ asset('vendor/angular/angular-sanitize.min.js') }} "></script>
 
+    <!--
      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.7.5/angular-sanitize.min.js"></script>
+     -->
      
      <!-- angular -->
     <script type="text/javascript">
@@ -281,6 +310,10 @@
                 },
             };
         });
+        app.constant("CSRF_TOKEN", '{{ csrf_token() }}');
+        app.constant("ROLE", '{{ isset(Auth::user()->type)? Auth::user()->type:"Guest" }}');
+        app.constant("ID", '{{ isset(Auth::user()->id)? Auth::user()->id:null }}');
+        app.constant("NAME", '{{ isset(Auth::user()->name)? Auth::user()->name:null }}');
         app.factory('Resource', function(Utility) {
             return {
                 base: "{{url('/')}}/", //"http://demo.fahadhussainkhan.com/",

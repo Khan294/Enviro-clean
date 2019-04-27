@@ -107,7 +107,7 @@
                     </select>
                     <div style="width:30%; float:right; display:inline-block;">
                       <br/>
-                      <button class="btn" style="float:right; clear:none;" ng-click="ui.sendData(inst.list, '#image')">[{ui.isEdit? "Edit": "Add"}]</button> 
+                      <button class="btn" style="float:right; clear:none;" ng-click="ui.sendData(inst.list, '#image')">[{ui.isEdit? "Save": "Add"}]</button> 
                     </div>
                 </div>
             </div>

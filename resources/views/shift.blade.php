@@ -144,7 +144,8 @@
                             <div class="calendar__slot expand" ng-if="cal.shifts[tag]!==undefined">
                               <div class="calendar__num" ng-style="cal.today==day && {'color':'red'}"> [{day}] </div>
                               <div class="" ng-repeat="(header, value) in (inst.list.data[cal.shifts[tag]].binds)">
-                                <span class="siteCard siteNormal"> [{inst.lookUp1.data[value-1].siteName}]</span>
+                                <!-- <span class="siteCard siteNormal"> [{inst.lookUp1.data[value-1].siteName}]</span> -->
+                                <span class="siteCard siteNormal"> [{ui.fetchSiteData(value)}]</span>
                               </div>
                             </div>
                             <div class="calendar__slot expand siteCreate" ng-if="cal.shifts[tag]===undefined">
@@ -278,6 +279,7 @@
         updateSites: function() {
           Resource.api("sitebyregion/" + $scope.inst.regionLookUp.current, "get", null, null, function(res) {
             $scope.ui.initList($scope.inst.lookUp1, res.data);
+            console.log($scope.inst.lookUp1);
           });
         },
         updateValet: function() {
@@ -301,6 +303,7 @@
               });
               $scope.cal.shifts[item.dateTag]= index;
             });
+            console.log(res.data);
             $scope.inst.list.data= res.data;
           });
         },
@@ -406,6 +409,10 @@
                 };
                 reader.readAsDataURL(input.files[0]);
             }
+        },
+        fetchSiteData(idx) {
+          if($scope.inst.lookUp1.data.length>0)
+            return $scope.inst.lookUp1.data.filter(x => x.id == idx)[0].siteName;
         }
       };
       $scope.loader();
